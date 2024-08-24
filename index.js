@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
-const cookieParser = require('cookie-parser')
-const jwt = require('jsonwebtoken');
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -11,7 +11,7 @@ require("dotenv").config();
 //middleware
 // app.use(cors());
 // app.use(cors(
-//  { 
+//  {
 //   origin:['http://localhost:5173/'],
 //   credentials:true
 //  }
@@ -24,7 +24,7 @@ app.use(
   })
 );
 app.use(express.json());
-app.use(cookieParser())
+app.use(cookieParser());
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
@@ -48,15 +48,30 @@ const client = new MongoClient(uri, {
 });
 
 //middleware-->use: frontEnd teke call hoye middleware e asbe then server er method(get,post,put,delete) e jabe
-const logger = (req,res,next) =>{
-  console.log('from logger middleware-->',req.method,req.url)
-  next()
-}
-const verifyToken = (req,res,next)=>{
-  const token = req?.cookies?.token
-  console.log("token in the middleware at verifyToken-->",token)
-  next()
-}
+const logger = (req, res, next) => {
+  console.log("from logger middleware-->", req.method, req.url);
+  next();
+};
+const verifyToken = (req, res, next) => {
+  const token = req?.cookies?.token;
+  console.log("token in the middleware at verifyToken-->", token);
+
+  //not token available
+  if (!token) {
+    return res.status(401).send({ message: "unauthorized access" });
+  }
+
+  //token verify
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ message: "unauthorized access" });
+    }
+    req.user = decoded;
+    next();
+  });
+
+  // next();
+};
 
 async function run() {
   try {
@@ -75,30 +90,31 @@ async function run() {
       .collection("booking_order");
 
     //auth related API-->JWT-->Json Web Token
-    app.post('/jwt',logger,(req,res)=>{
-      const user = req.body
-      console.log('user for token',user)
+    app.post("/jwt", logger, (req, res) => {
+      const user = req.body;
+      console.log("user for token", user);
       // const token = jwt.sign(user,'secret',{expiresIn:'1h'})
       // const token =  jwt.sign(user,process.env.ACCESS_TOKEN,{expiresIn:'1h'})
-      const token =  jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'})
-      console.log('user token--->',token)
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1h",
+      });
+      console.log("user token--->", token);
       // res.send({token})
-      res.cookie('token',token,{
-        httpOnly:true,
-        secure:true,
-        sameSite:'none'
-      })
-      res.send({success:true})
-    })
-    app.post('/logout',async(req,res)=>{
-      const user = req.body
-      console.log("logout-->",user)
-      res.clearCookie('token',{maxAge:0}).send({success:true})
-    })
-   
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+      });
+      res.send({ success: true });
+    });
+    app.post("/logout", async (req, res) => {
+      const user = req.body;
+      console.log("logout-->", user);
+      res.clearCookie("token", { maxAge: 0 }).send({ success: true });
+    });
 
     //services related API
-      //READ-->get all user
+    //READ-->get all user
     app.get("/getAllServices", async (req, res) => {
       const getAllServices = await carServicesCollection.find().toArray();
       console.log(getAllServices);
@@ -128,13 +144,17 @@ async function run() {
     });
 
     //READ
-    app.get("/allBookingsOrder",logger,verifyToken, async (req, res) => {
+    app.get("/allBookingsOrder", logger, verifyToken, async (req, res) => {
       console.log(req.query);
       //http://localhost:3000/allBookingsOrder?email=abul09@gmail.com&sort=1
       //{ email: 'abul09@gmail.com', sort: '1' }
 
       console.log(req.query.email);
-      console.log("token At allBookings Order---->",req.cookies.token)
+      // console.log("token At allBookings Order---->", req.cookies.token);
+      console.log("token user info---->", req.user);
+      if (req.user.email !== req.query.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
 
       let query = {};
       if (req.query?.email) {
