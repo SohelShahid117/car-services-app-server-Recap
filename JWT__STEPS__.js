@@ -46,5 +46,10 @@ in axios set -->withCredential:true
 4.cors setup origin & credentials true
 
 
+###for secure API Calls
+// 1.server site:install cookie parser & use it as a middleware-->https://expressjs.com/en/resources/middleware/cookie-parser.html
+2.req.cookies
+3.on the client site : make API call using axios withCredentials:true || credentials:'include' while using fetch
+4.
 
 */
