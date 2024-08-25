@@ -19,7 +19,11 @@ require("dotenv").config();
 
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: [
+      "http://localhost:5173",
+      "https://car-service-app-recap.web.app",
+      "https://car-service-app-recap.firebaseapp.com",
+    ],
     // origin: [
     //   "http://localhost:5173/",
     //   "https://car-service-app-recap.web.app",
