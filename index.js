@@ -19,7 +19,11 @@ require("dotenv").config();
 
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    // origin: ["http://localhost:5173"],
+    origin: [
+      'https://car-service-app-recap.web.app',
+      'https://car-service-app-recap.firebaseapp.com'
+    ],
     credentials: true,
   })
 );
@@ -27,7 +31,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.send("Hello World!enJoy MERN");
 });
 
 //car_services
