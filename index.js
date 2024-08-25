@@ -1,3 +1,9 @@
+//client firebase domain link : https://car-service-app-recap.web.app/
+//server vercel domain link : https://car-services-app-server-recap-c6jy.vercel.app/getAllServices
+
+//vercel : https://vercel.com/sohels-projects-89204b76/car-services-app-server-recap-c6jy
+//firebase : https://console.firebase.google.com/project/car-service-app-recap/hosting/sites/car-service-app-recap
+
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
